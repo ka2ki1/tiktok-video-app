@@ -23,6 +23,10 @@ function App() {
     setMemo("");
   }
 
+  function handleDelete(id) {
+    setVideos(videos.filter((video) => video.id !== id));
+  }
+
   return (
     <div>
       <h1>TikTok動画まとめアプリ</h1>
@@ -48,7 +52,10 @@ function App() {
 
         <div>
           <label>メモ</label>
-          <textarea value={memo} onChange={(e) => setMemo(e.target.value)} />
+          <textarea
+            value={memo}
+            onChange={(e) => setMemo(e.target.value)}
+          />
         </div>
 
         <button type="submit">登録</button>
@@ -58,10 +65,16 @@ function App() {
         {videos.map((video) => (
           <li key={video.id}>
             <h2>{video.title}</h2>
+
             <a href={video.url} target="_blank" rel="noreferrer">
               TikTokを開く
             </a>
+
             <p>{video.memo}</p>
+
+            <button onClick={() => handleDelete(video.id)}>
+              削除
+            </button>
           </li>
         ))}
       </ul>
