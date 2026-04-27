@@ -1,10 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function App() {
-  const [videos, setVideos] = useState([]);
+  const [videos, setVideos] = useState(() => {
+    const saved = localStorage.getItem("tiktokVideos");
+    return saved ? JSON.parse(saved) : [];
+  });
+
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
   const [memo, setMemo] = useState("");
+
+  useEffect(() => {
+    localStorage.setItem("tiktokVideos", JSON.stringify(videos));
+  }, [videos]);
 
   function handleSubmit(e) {
     e.preventDefault();
