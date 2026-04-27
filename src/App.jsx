@@ -12,6 +12,7 @@ function App() {
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
   const [memo, setMemo] = useState("");
+  const [searchText, setSearchText] = useState("");
 
   const [videos, setVideos] = useState(() => {
     const saved = localStorage.getItem("tiktokVideos");
@@ -27,14 +28,9 @@ function App() {
       const res = await fetch(
         `http://localhost:3001/api/tiktok?url=${encodeURIComponent(tiktokUrl)}`
       );
-
       const data = await res.json();
-
-      console.log("server data:", data);
-
       return data.thumbnail_url || "";
-    } catch (error) {
-      console.error("サムネイル取得失敗:", error);
+    } catch {
       return "";
     }
   }
@@ -48,8 +44,6 @@ function App() {
     }
 
     const thumbnail = await fetchThumbnail(url);
-
-    console.log("取得したサムネイル:", thumbnail);
 
     const newVideo = {
       id: String(Date.now()),
@@ -72,16 +66,23 @@ function App() {
 
   function handleDragEnd(event) {
     const { active, over } = event;
-
     if (!over || active.id === over.id) return;
 
     setVideos((items) => {
-      const oldIndex = items.findIndex((item) => item.id === active.id);
-      const newIndex = items.findIndex((item) => item.id === over.id);
-
+      const oldIndex = items.findIndex((i) => i.id === active.id);
+      const newIndex = items.findIndex((i) => i.id === over.id);
       return arrayMove(items, oldIndex, newIndex);
     });
   }
+
+  const filteredVideos = videos.filter((video) => {
+    const keyword = searchText.toLowerCase();
+
+    return (
+      video.title.toLowerCase().includes(keyword) ||
+      video.memo.toLowerCase().includes(keyword)
+    );
+  });
 
   return (
     <div className="container">
@@ -111,18 +112,33 @@ function App() {
         <button type="submit">登録</button>
       </form>
 
-      <h2>登録した動画一覧</h2>
+      {/* 🔥 ここが検索UI */}
+      <div className="search-row">
+        <input
+          className="search-input"
+          type="text"
+          placeholder="タイトル・メモで検索"
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+        />
 
-      {videos.length === 0 ? (
-        <p className="empty-message">まだ動画が登録されていません。</p>
+        <button className="favorite-filter-button">
+          ☆ お気に入りのみ
+        </button>
+      </div>
+
+      <h2>動画一覧</h2>
+
+      {filteredVideos.length === 0 ? (
+        <p className="empty-message">該当する動画がありません</p>
       ) : (
         <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext
-            items={videos.map((video) => video.id)}
+            items={filteredVideos.map((v) => v.id)}
             strategy={rectSortingStrategy}
           >
             <div className="video-grid">
-              {videos.map((video) => (
+              {filteredVideos.map((video) => (
                 <SortableItem
                   key={video.id}
                   video={video}
