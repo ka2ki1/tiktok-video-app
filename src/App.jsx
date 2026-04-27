@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 function App() {
+  const [videos, setVideos] = useState([]);
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
   const [memo, setMemo] = useState("");
@@ -8,11 +9,18 @@ function App() {
   function handleSubmit(e) {
     e.preventDefault();
 
-    console.log({
+    const newVideo = {
+      id: Date.now(),
       title,
       url,
       memo,
-    });
+    };
+
+    setVideos([newVideo, ...videos]);
+
+    setTitle("");
+    setUrl("");
+    setMemo("");
   }
 
   return (
@@ -45,6 +53,18 @@ function App() {
 
         <button type="submit">登録</button>
       </form>
+
+      <ul>
+        {videos.map((video) => (
+          <li key={video.id}>
+            <h2>{video.title}</h2>
+            <a href={video.url} target="_blank" rel="noreferrer">
+              TikTokを開く
+            </a>
+            <p>{video.memo}</p>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
