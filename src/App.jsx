@@ -1,26 +1,61 @@
 import { useState, useEffect } from "react";
+import { DndContext, closestCenter } from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  rectSortingStrategy,
+} from "@dnd-kit/sortable";
+import SortableItem from "./SortableItem";
+import "./index.css";
 
 function App() {
+  const [title, setTitle] = useState("");
+  const [url, setUrl] = useState("");
+  const [memo, setMemo] = useState("");
+
   const [videos, setVideos] = useState(() => {
     const saved = localStorage.getItem("tiktokVideos");
     return saved ? JSON.parse(saved) : [];
   });
 
-  const [title, setTitle] = useState("");
-  const [url, setUrl] = useState("");
-  const [memo, setMemo] = useState("");
-
   useEffect(() => {
     localStorage.setItem("tiktokVideos", JSON.stringify(videos));
   }, [videos]);
 
-  function handleSubmit(e) {
+  async function fetchThumbnail(tiktokUrl) {
+    try {
+      const res = await fetch(
+        `http://localhost:3001/api/tiktok?url=${encodeURIComponent(tiktokUrl)}`
+      );
+
+      const data = await res.json();
+
+      console.log("server data:", data);
+
+      return data.thumbnail_url || "";
+    } catch (error) {
+      console.error("サムネイル取得失敗:", error);
+      return "";
+    }
+  }
+
+  async function handleSubmit(e) {
     e.preventDefault();
 
+    if (!title.trim() || !url.trim()) {
+      alert("タイトルとURLは必須です");
+      return;
+    }
+
+    const thumbnail = await fetchThumbnail(url);
+
+    console.log("取得したサムネイル:", thumbnail);
+
     const newVideo = {
-      id: Date.now(),
+      id: String(Date.now()),
       title,
       url,
+      thumbnail,
       memo,
     };
 
@@ -35,57 +70,69 @@ function App() {
     setVideos(videos.filter((video) => video.id !== id));
   }
 
+  function handleDragEnd(event) {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) return;
+
+    setVideos((items) => {
+      const oldIndex = items.findIndex((item) => item.id === active.id);
+      const newIndex = items.findIndex((item) => item.id === over.id);
+
+      return arrayMove(items, oldIndex, newIndex);
+    });
+  }
+
   return (
-    <div>
+    <div className="container">
       <h1>TikTok動画まとめアプリ</h1>
 
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>タイトル</label>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-        </div>
+      <form className="video-form" onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="タイトル"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
 
-        <div>
-          <label>TikTok URL</label>
-          <input
-            type="text"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-          />
-        </div>
+        <input
+          type="text"
+          placeholder="TikTok URL"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+        />
 
-        <div>
-          <label>メモ</label>
-          <textarea
-            value={memo}
-            onChange={(e) => setMemo(e.target.value)}
-          />
-        </div>
+        <textarea
+          placeholder="メモ"
+          value={memo}
+          onChange={(e) => setMemo(e.target.value)}
+        />
 
         <button type="submit">登録</button>
       </form>
 
-      <ul>
-        {videos.map((video) => (
-          <li key={video.id}>
-            <h2>{video.title}</h2>
+      <h2>登録した動画一覧</h2>
 
-            <a href={video.url} target="_blank" rel="noreferrer">
-              TikTokを開く
-            </a>
-
-            <p>{video.memo}</p>
-
-            <button onClick={() => handleDelete(video.id)}>
-              削除
-            </button>
-          </li>
-        ))}
-      </ul>
+      {videos.length === 0 ? (
+        <p className="empty-message">まだ動画が登録されていません。</p>
+      ) : (
+        <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext
+            items={videos.map((video) => video.id)}
+            strategy={rectSortingStrategy}
+          >
+            <div className="video-grid">
+              {videos.map((video) => (
+                <SortableItem
+                  key={video.id}
+                  video={video}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
+      )}
     </div>
   );
 }
