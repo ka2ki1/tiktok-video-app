@@ -1,7 +1,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-function SortableItem({ video, onDelete }) {
+function SortableItem({ video, onDelete, onToggleFavorite }) {
   const {
     attributes,
     listeners,
@@ -13,6 +13,18 @@ function SortableItem({ video, onDelete }) {
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+  };
+
+  const starStyle = {
+    display: "block",
+    margin: "0 0 12px",
+    padding: 0,
+    border: "none",
+    background: "transparent",
+    color: video.isFavorite ? "#f5a400" : "#bbb",
+    fontSize: "28px",
+    lineHeight: 1,
+    cursor: "pointer",
   };
 
   return (
@@ -28,6 +40,14 @@ function SortableItem({ video, onDelete }) {
 
         <div className="card-body">
           <h3>{video.title}</h3>
+
+          <button
+            type="button"
+            style={starStyle}
+            onClick={() => onToggleFavorite(video.id)}
+          >
+            {video.isFavorite ? "★" : "☆"}
+          </button>
 
           {video.memo && <p>{video.memo}</p>}
 

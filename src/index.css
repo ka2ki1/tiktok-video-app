@@ -64,7 +64,6 @@ h2 {
   cursor: pointer;
 }
 
-/* 検索エリア */
 .search-row {
   display: flex;
   gap: 12px;
@@ -183,8 +182,8 @@ h2 {
   }
 
   .search-row {
-    grid-template-columns: 1fr;
     display: grid;
+    grid-template-columns: 1fr;
   }
 }
 
@@ -196,4 +195,67 @@ h2 {
   .video-grid {
     grid-template-columns: 1fr;
   }
+
+  .star-button {
+    display: block;
+    margin: 0 0 12px;
+    border: none;
+    background: transparent;
+    color: #f5a400;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .star-button.active {
+    color: #f5a400;
+  }
+
+  .favorite-filter-button.active {
+    background: #f5a400;
+    color: white;
+  }
+
+  .star-button {
+    display: block;
+    margin: 0 0 12px;
+    border: none;
+    background: transparent;
+    color: #ccc;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+  }
+
+  .star-button.active {
+    color: #f5a400;
+  }
+
+  .favorite-filter-button.active {
+    background: #f5a400;
+    color: white;
+  }
+
+    .card-body .star-button {
+      display: block;
+      margin: 0 0 12px;
+      padding: 0;
+      border: none;
+      background: transparent;
+      color: #bbb;
+      font-size: 26px;
+      line-height: 1;
+      cursor: pointer;
+      appearance: none;
+    }
+
+    .card-body .star-button.active {
+      color: #f5a400;
+    }
+
+    .favorite-filter-button.active {
+      background: #f5a400;
+      color: white;
+    }
 }
