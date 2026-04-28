@@ -13,6 +13,7 @@ function App() {
   const [url, setUrl] = useState("");
   const [memo, setMemo] = useState("");
   const [searchText, setSearchText] = useState("");
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
 
   const [videos, setVideos] = useState(() => {
     const saved = localStorage.getItem("tiktokVideos");
@@ -51,6 +52,7 @@ function App() {
       url,
       thumbnail,
       memo,
+      isFavorite: false,
     };
 
     setVideos([newVideo, ...videos]);
@@ -62,6 +64,14 @@ function App() {
 
   function handleDelete(id) {
     setVideos(videos.filter((video) => video.id !== id));
+  }
+
+  function handleToggleFavorite(id) {
+    setVideos((prev) =>
+      prev.map((v) =>
+        v.id === id ? { ...v, isFavorite: !v.isFavorite } : v
+      )
+    );
   }
 
   function handleDragEnd(event) {
@@ -78,10 +88,13 @@ function App() {
   const filteredVideos = videos.filter((video) => {
     const keyword = searchText.toLowerCase();
 
-    return (
+    const matchesSearch =
       video.title.toLowerCase().includes(keyword) ||
-      video.memo.toLowerCase().includes(keyword)
-    );
+      video.memo.toLowerCase().includes(keyword);
+
+    const matchesFavorite = showFavoritesOnly ? video.isFavorite : true;
+
+    return matchesSearch && matchesFavorite;
   });
 
   return (
@@ -112,7 +125,6 @@ function App() {
         <button type="submit">登録</button>
       </form>
 
-      {/* 🔥 ここが検索UI */}
       <div className="search-row">
         <input
           className="search-input"
@@ -122,8 +134,16 @@ function App() {
           onChange={(e) => setSearchText(e.target.value)}
         />
 
-        <button className="favorite-filter-button">
-          ☆ お気に入りのみ
+        <button
+          type="button"
+          className={
+            showFavoritesOnly
+              ? "favorite-filter-button active"
+              : "favorite-filter-button"
+          }
+          onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+        >
+          {showFavoritesOnly ? "★ お気に入り中" : "☆ お気に入りのみ"}
         </button>
       </div>
 
@@ -143,6 +163,7 @@ function App() {
                   key={video.id}
                   video={video}
                   onDelete={handleDelete}
+                  onToggleFavorite={handleToggleFavorite}
                 />
               ))}
             </div>
