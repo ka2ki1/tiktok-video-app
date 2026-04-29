@@ -1,7 +1,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-function SortableItem({ video, onDelete, onToggleFavorite }) {
+function SortableItem({ video, onDelete, onToggleFavorite, onEdit }) {
   const {
     attributes,
     listeners,
@@ -55,6 +55,10 @@ function SortableItem({ video, onDelete, onToggleFavorite }) {
             <a href={video.url} target="_blank" rel="noreferrer">
               TikTokを開く
             </a>
+
+            <button type="button" onClick={() => onEdit(video)}>
+              編集
+            </button>
 
             <button type="button" onClick={() => onDelete(video.id)}>
               削除
