@@ -14,6 +14,7 @@ function App() {
   const [memo, setMemo] = useState("");
   const [searchText, setSearchText] = useState("");
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [editingId, setEditingId] = useState(null);
 
   const [videos, setVideos] = useState(() => {
     const saved = localStorage.getItem("tiktokVideos");
@@ -44,6 +45,27 @@ function App() {
       return;
     }
 
+    if (editingId) {
+      setVideos((prev) =>
+        prev.map((video) =>
+          video.id === editingId
+            ? {
+              ...video,
+              title,
+              url,
+              memo,
+            }
+            : video
+        )
+      );
+
+      setEditingId(null);
+      setTitle("");
+      setUrl("");
+      setMemo("");
+      return;
+    }
+
     const thumbnail = await fetchThumbnail(url);
 
     const newVideo = {
@@ -57,6 +79,20 @@ function App() {
 
     setVideos([newVideo, ...videos]);
 
+    setTitle("");
+    setUrl("");
+    setMemo("");
+  }
+
+  function handleEdit(video) {
+    setEditingId(video.id);
+    setTitle(video.title);
+    setUrl(video.url);
+    setMemo(video.memo || "");
+  }
+
+  function handleCancelEdit() {
+    setEditingId(null);
     setTitle("");
     setUrl("");
     setMemo("");
@@ -122,7 +158,13 @@ function App() {
           onChange={(e) => setMemo(e.target.value)}
         />
 
-        <button type="submit">登録</button>
+        <button type="submit">{editingId ? "更新" : "登録"}</button>
+
+        {editingId && (
+          <button type="button" onClick={handleCancelEdit}>
+            キャンセル
+          </button>
+        )}
       </form>
 
       <div className="search-row">
@@ -164,6 +206,7 @@ function App() {
                   video={video}
                   onDelete={handleDelete}
                   onToggleFavorite={handleToggleFavorite}
+                  onEdit={handleEdit}
                 />
               ))}
             </div>
