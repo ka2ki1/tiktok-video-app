@@ -309,4 +309,43 @@ h2 {
     margin-top: 12px;
     color: #555;
   }
+
+  .edit-button {
+    padding: 8px 14px;
+    border: 1px solid #1677ff;
+    border-radius: 8px;
+    background: white;
+    color: #1677ff;
+    cursor: pointer;
+  }
+
+  .edit-button:hover {
+    background: #1677ff;
+    color: white;
+  }
+
+    /* 既存の赤ボタンを上書きする */
+    .card-actions button {
+      padding: 8px 14px;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+    }
+
+    /* 削除ボタン（赤） */
+    .card-actions button:last-child {
+      border: 1px solid #ff4d4f;
+      color: #ff4d4f;
+    }
+
+    /* 編集ボタン（青） */
+    .card-actions .edit-button {
+      border: 1px solid #1677ff;
+      color: #1677ff;
+    }
+
+    .card-actions .edit-button:hover {
+      background: #1677ff;
+      color: white;
+    }
 }

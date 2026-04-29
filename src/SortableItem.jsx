@@ -27,6 +27,15 @@ function SortableItem({ video, onDelete, onToggleFavorite, onEdit }) {
     cursor: "pointer",
   };
 
+  const editButtonStyle = {
+    padding: "8px 14px",
+    border: "1px solid #1677ff",
+    borderRadius: "8px",
+    background: "white",
+    color: "#1677ff",
+    cursor: "pointer",
+  };
+
   return (
     <div ref={setNodeRef} style={style} className="sortable-item">
       <div className="video-card">
@@ -56,7 +65,11 @@ function SortableItem({ video, onDelete, onToggleFavorite, onEdit }) {
               TikTokを開く
             </a>
 
-            <button type="button" onClick={() => onEdit(video)}>
+            <button
+              type="button"
+              style={editButtonStyle}
+              onClick={() => onEdit(video)}
+            >
               編集
             </button>
 
