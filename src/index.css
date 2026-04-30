@@ -5,8 +5,8 @@
 body {
   margin: 0;
   font-family: sans-serif;
-  background: #f5f5f5;
-  color: #111;
+  background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
+  color: #fff;
 }
 
 .container {
@@ -19,6 +19,7 @@ h1 {
   text-align: center;
   font-size: 40px;
   margin: 0 0 32px;
+  color: #fff;
 }
 
 h2 {
@@ -26,15 +27,15 @@ h2 {
   font-size: 24px;
 }
 
+/* フォーム */
 .video-form {
   display: grid;
   grid-template-columns: 1fr 1fr 1.2fr auto;
   gap: 16px;
   align-items: center;
-  background: white;
+  background: #181818;
   padding: 20px;
   border-radius: 14px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
 .video-form input,
@@ -43,9 +44,10 @@ h2 {
   height: 46px;
   padding: 0 14px;
   font-size: 16px;
-  border: 1px solid #ccc;
+  border: 1px solid #444;
   border-radius: 8px;
-  background: white;
+  background: #242424;
+  color: #fff;
 }
 
 .video-form textarea {
@@ -53,17 +55,23 @@ h2 {
   padding-top: 12px;
 }
 
+.video-form input::placeholder,
+.video-form textarea::placeholder {
+  color: #aaa;
+}
+
 .video-form button {
   height: 46px;
   padding: 0 28px;
   border: none;
   border-radius: 8px;
-  background: #050505;
+  background: linear-gradient(90deg, #25f4ee, #fe2c55);
   color: white;
   font-weight: bold;
   cursor: pointer;
 }
 
+/* 検索 */
 .search-row {
   display: flex;
   gap: 12px;
@@ -77,44 +85,56 @@ h2 {
   height: 46px;
   padding: 0 14px;
   font-size: 16px;
-  border: 2px solid #111;
+  border: 2px solid #333;
   border-radius: 8px;
-  background: white;
+  background: #242424;
+  color: #fff;
+}
+
+.search-input::placeholder {
+  color: #aaa;
 }
 
 .favorite-filter-button {
   height: 46px;
   padding: 0 18px;
-  border: 1px solid #f5a400;
+  border: 1px solid #fe2c55;
   border-radius: 8px;
-  background: white;
-  color: #f5a400;
+  background: transparent;
+  color: #fe2c55;
   font-weight: bold;
   cursor: pointer;
-  white-space: nowrap;
 }
 
+.favorite-filter-button.active {
+  background: #fe2c55;
+  color: white;
+}
+
+/* カード */
 .video-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 22px;
 }
 
-.sortable-item {
-  touch-action: none;
-}
-
 .video-card {
-  background: white;
+  background: #181818;
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  border: 1px solid #333;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.video-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 24px rgba(254, 44, 85, 0.25);
 }
 
 .thumbnail-wrap {
   width: 100%;
   aspect-ratio: 1 / 1.25;
-  background: #eee;
+  background: #222;
   overflow: hidden;
   cursor: grab;
 }
@@ -126,12 +146,12 @@ h2 {
 }
 
 .no-thumbnail {
-  width: 100%;
-  height: 100%;
-  display: grid;
-  place-items: center;
-  color: #777;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
   font-weight: bold;
+  height: 100%;
 }
 
 .card-body {
@@ -145,207 +165,69 @@ h2 {
 
 .card-body p {
   margin: 0 0 14px;
-  color: #555;
+  color: #bbb;
 }
 
+/* アクション */
 .card-actions {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .card-actions a {
-  color: #0066ff;
+  color: #25f4ee;
   font-weight: bold;
 }
 
 .card-actions button {
   padding: 8px 14px;
-  border: 1px solid #ff4d4f;
   border-radius: 8px;
-  background: white;
-  color: #ff4d4f;
+  background: transparent;
   cursor: pointer;
+  font-weight: bold;
 }
 
+/* 削除（赤） */
+.card-actions button:last-child {
+  border: 1px solid #ff4d4f;
+  color: #ff4d4f;
+}
+
+/* 編集（青） */
+.card-actions .edit-button {
+  border: 1px solid #1677ff;
+  color: #1677ff;
+}
+
+/* 空状態 */
 .empty-message {
-  color: #777;
+  color: #aaa;
 }
 
-@media (max-width: 900px) {
-  .video-form {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .video-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .search-row {
-    display: grid;
-    grid-template-columns: 1fr;
-  }
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-@media (max-width: 600px) {
-  .video-form {
-    grid-template-columns: 1fr;
-  }
+.card-actions a {
+  font-size: 14px;
+}
 
-  .video-grid {
-    grid-template-columns: 1fr;
-  }
+.card-actions button {
+  height: 34px;
+  padding: 0 12px;
+  font-size: 13px;
+}
 
-  .star-button {
-    display: block;
-    margin: 0 0 12px;
-    border: none;
-    background: transparent;
-    color: #f5a400;
-    font-size: 24px;
-    cursor: pointer;
-    padding: 0;
-  }
+/* 削除を右端に固定 */
+.card-actions button:last-child {
+  margin-left: auto;
+}
 
-  .star-button.active {
-    color: #f5a400;
-  }
-
-  .favorite-filter-button.active {
-    background: #f5a400;
-    color: white;
-  }
-
-  .star-button {
-    display: block;
-    margin: 0 0 12px;
-    border: none;
-    background: transparent;
-    color: #ccc;
-    font-size: 24px;
-    cursor: pointer;
-    padding: 0;
-    line-height: 1;
-  }
-
-  .star-button.active {
-    color: #f5a400;
-  }
-
-  .favorite-filter-button.active {
-    background: #f5a400;
-    color: white;
-  }
-
-  .card-body .star-button {
-    display: block;
-    margin: 0 0 12px;
-    padding: 0;
-    border: none;
-    background: transparent;
-    color: #bbb;
-    font-size: 26px;
-    line-height: 1;
-    cursor: pointer;
-    appearance: none;
-  }
-
-  .card-body .star-button.active {
-    color: #f5a400;
-  }
-
-  .favorite-filter-button.active {
-    background: #f5a400;
-    color: white;
-  }
-
-  .play-button {
-    width: 100%;
-    margin-bottom: 12px;
-    padding: 10px;
-    border: none;
-    border-radius: 8px;
-    background: #111;
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-  }
-
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.65);
-    display: grid;
-    place-items: center;
-    z-index: 999;
-  }
-
-  .modal-content {
-    width: min(420px, 92vw);
-    background: white;
-    border-radius: 14px;
-    padding: 20px;
-    position: relative;
-  }
-
-  .modal-close-button {
-    position: absolute;
-    top: 10px;
-    right: 12px;
-    border: none;
-    background: transparent;
-    font-size: 28px;
-    cursor: pointer;
-  }
-
-  .modal-iframe {
-    width: 100%;
-    height: 620px;
-    border: none;
-    border-radius: 12px;
-  }
-
-  .modal-memo {
-    margin-top: 12px;
-    color: #555;
-  }
-
-  .edit-button {
-    padding: 8px 14px;
-    border: 1px solid #1677ff;
-    border-radius: 8px;
-    background: white;
-    color: #1677ff;
-    cursor: pointer;
-  }
-
-  .edit-button:hover {
-    background: #1677ff;
-    color: white;
-  }
-
-    /* 既存の赤ボタンを上書きする */
-    .card-actions button {
-      padding: 8px 14px;
-      border-radius: 8px;
-      background: white;
-      cursor: pointer;
-    }
-
-    /* 削除ボタン（赤） */
-    .card-actions button:last-child {
-      border: 1px solid #ff4d4f;
-      color: #ff4d4f;
-    }
-
-    /* 編集ボタン（青） */
-    .card-actions .edit-button {
-      border: 1px solid #1677ff;
-      color: #1677ff;
-    }
-
-    .card-actions .edit-button:hover {
-      background: #1677ff;
-      color: white;
-    }
+/* 編集ボタンの高さをリンクに合わせる */
+.edit-button {
+  display: inline-flex;
+  align-items: center;
 }
