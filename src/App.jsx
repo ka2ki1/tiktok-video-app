@@ -12,7 +12,7 @@ function App() {
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
   const [memo, setMemo] = useState("");
-  const [thumbnailUrl, setThumbnailUrl] = useState("");
+  const [thumbnailFile, setThumbnailFile] = useState("");
   const [category, setCategory] = useState("勉強");
 
   const [searchText, setSearchText] = useState("");
@@ -44,6 +44,19 @@ function App() {
     }
   }
 
+  function handleThumbnailFileChange(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      setThumbnailFile(reader.result);
+    };
+
+    reader.readAsDataURL(file);
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
 
@@ -62,7 +75,7 @@ function App() {
               url,
               memo,
               category,
-              thumbnail: thumbnailUrl || video.thumbnail,
+              thumbnail: thumbnailFile || video.thumbnail,
             }
             : video
         )
@@ -80,7 +93,7 @@ function App() {
       url,
       memo,
       category,
-      thumbnail: thumbnailUrl || fetchedThumbnail,
+      thumbnail: thumbnailFile || fetchedThumbnail,
       isFavorite: false,
     };
 
@@ -94,7 +107,7 @@ function App() {
     setTitle("");
     setUrl("");
     setMemo("");
-    setThumbnailUrl("");
+    setThumbnailFile("");
     setCategory("勉強");
   }
 
@@ -103,7 +116,7 @@ function App() {
     setTitle(video.title);
     setUrl(video.url);
     setMemo(video.memo || "");
-    setThumbnailUrl(video.thumbnail || "");
+    setThumbnailFile("");
     setCategory(video.category || "勉強");
   }
 
@@ -175,10 +188,10 @@ function App() {
         />
 
         <input
-          type="text"
-          placeholder="サムネイルURL（任意）"
-          value={thumbnailUrl}
-          onChange={(e) => setThumbnailUrl(e.target.value)}
+          className="thumbnail-file-input"
+          type="file"
+          accept="image/*"
+          onChange={handleThumbnailFileChange}
         />
 
         <textarea
