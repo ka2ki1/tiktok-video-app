@@ -13,6 +13,7 @@ function App() {
   const [url, setUrl] = useState("");
   const [memo, setMemo] = useState("");
   const [thumbnailUrl, setThumbnailUrl] = useState("");
+  const [thumbnailFile, setThumbnailFile] = useState("");
   const [category, setCategory] = useState("勉強");
 
   const [searchText, setSearchText] = useState("");
@@ -44,6 +45,19 @@ function App() {
     }
   }
 
+  function handleThumbnailFileChange(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      setThumbnailFile(reader.result);
+    };
+
+    reader.readAsDataURL(file);
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
 
@@ -62,7 +76,7 @@ function App() {
               url,
               memo,
               category,
-              thumbnail: thumbnailUrl || video.thumbnail,
+              thumbnail: thumbnailFile || thumbnailUrl || video.thumbnail,
             }
             : video
         )
@@ -80,7 +94,7 @@ function App() {
       url,
       memo,
       category,
-      thumbnail: thumbnailUrl || fetchedThumbnail,
+      thumbnail: thumbnailFile || thumbnailUrl || fetchedThumbnail,
       isFavorite: false,
     };
 
@@ -95,6 +109,7 @@ function App() {
     setUrl("");
     setMemo("");
     setThumbnailUrl("");
+    setThumbnailFile("");
     setCategory("勉強");
   }
 
@@ -104,6 +119,7 @@ function App() {
     setUrl(video.url);
     setMemo(video.memo || "");
     setThumbnailUrl(video.thumbnail || "");
+    setThumbnailFile("");
     setCategory(video.category || "勉強");
   }
 
@@ -179,6 +195,13 @@ function App() {
           placeholder="サムネイルURL（任意）"
           value={thumbnailUrl}
           onChange={(e) => setThumbnailUrl(e.target.value)}
+        />
+
+        <input
+          className="thumbnail-file-input"
+          type="file"
+          accept="image/*"
+          onChange={handleThumbnailFileChange}
         />
 
         <textarea

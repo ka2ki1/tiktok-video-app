@@ -287,3 +287,35 @@ h2 {
   color: #111;
   border: 1px solid #ccc;
 }
+
+.thumbnail-file-input {
+  height: 46px;
+  padding: 10px 14px;
+  font-size: 14px;
+  border: 1px solid #444;
+  border-radius: 8px;
+  background: #242424;
+  color: #fff;
+}
+
+.pagination {
+  margin: 30px 0;
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  align-items: center;
+}
+
+.pagination button {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid #555;
+  background: #222;
+  color: #fff;
+  cursor: pointer;
+}
+
+.pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
