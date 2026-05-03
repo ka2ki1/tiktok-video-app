@@ -34,6 +34,8 @@ function SortableItem({ video, onDelete, onToggleFavorite, onEdit }) {
     background: "white",
     color: "#1677ff",
     cursor: "pointer",
+    whiteSpace: "nowrap",
+    flexShrink: 0,
   };
 
   return (
@@ -49,6 +51,8 @@ function SortableItem({ video, onDelete, onToggleFavorite, onEdit }) {
 
         <div className="card-body">
           <h3>{video.title}</h3>
+
+          <p className="category-label">{video.category || "未分類"}</p>
 
           <button
             type="button"

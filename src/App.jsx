@@ -12,9 +12,16 @@ function App() {
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
   const [memo, setMemo] = useState("");
+  const [thumbnailUrl, setThumbnailUrl] = useState("");
+  const [category, setCategory] = useState("勉強");
+
   const [searchText, setSearchText] = useState("");
+  const [filterCategory, setFilterCategory] = useState("すべて");
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [editingId, setEditingId] = useState(null);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
 
   const [videos, setVideos] = useState(() => {
     const saved = localStorage.getItem("tiktokVideos");
@@ -54,34 +61,41 @@ function App() {
               title,
               url,
               memo,
+              category,
+              thumbnail: thumbnailUrl || video.thumbnail,
             }
             : video
         )
       );
 
-      setEditingId(null);
-      setTitle("");
-      setUrl("");
-      setMemo("");
+      resetForm();
       return;
     }
 
-    const thumbnail = await fetchThumbnail(url);
+    const fetchedThumbnail = await fetchThumbnail(url);
 
     const newVideo = {
       id: String(Date.now()),
       title,
       url,
-      thumbnail,
       memo,
+      category,
+      thumbnail: thumbnailUrl || fetchedThumbnail,
       isFavorite: false,
     };
 
     setVideos([newVideo, ...videos]);
+    resetForm();
+    setCurrentPage(1);
+  }
 
+  function resetForm() {
+    setEditingId(null);
     setTitle("");
     setUrl("");
     setMemo("");
+    setThumbnailUrl("");
+    setCategory("勉強");
   }
 
   function handleEdit(video) {
@@ -89,13 +103,8 @@ function App() {
     setTitle(video.title);
     setUrl(video.url);
     setMemo(video.memo || "");
-  }
-
-  function handleCancelEdit() {
-    setEditingId(null);
-    setTitle("");
-    setUrl("");
-    setMemo("");
+    setThumbnailUrl(video.thumbnail || "");
+    setCategory(video.category || "勉強");
   }
 
   function handleDelete(id) {
@@ -104,8 +113,10 @@ function App() {
 
   function handleToggleFavorite(id) {
     setVideos((prev) =>
-      prev.map((v) =>
-        v.id === id ? { ...v, isFavorite: !v.isFavorite } : v
+      prev.map((video) =>
+        video.id === id
+          ? { ...video, isFavorite: !video.isFavorite }
+          : video
       )
     );
   }
@@ -126,12 +137,23 @@ function App() {
 
     const matchesSearch =
       video.title.toLowerCase().includes(keyword) ||
-      video.memo.toLowerCase().includes(keyword);
+      (video.memo || "").toLowerCase().includes(keyword);
+
+    const matchesCategory =
+      filterCategory === "すべて" ||
+      (video.category || "未分類") === filterCategory;
 
     const matchesFavorite = showFavoritesOnly ? video.isFavorite : true;
 
-    return matchesSearch && matchesFavorite;
+    return matchesSearch && matchesCategory && matchesFavorite;
   });
+
+  const totalPages = Math.ceil(filteredVideos.length / itemsPerPage) || 1;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedVideos = filteredVideos.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
 
   return (
     <div className="container">
@@ -152,16 +174,31 @@ function App() {
           onChange={(e) => setUrl(e.target.value)}
         />
 
+        <input
+          type="text"
+          placeholder="サムネイルURL（任意）"
+          value={thumbnailUrl}
+          onChange={(e) => setThumbnailUrl(e.target.value)}
+        />
+
         <textarea
           placeholder="メモ"
           value={memo}
           onChange={(e) => setMemo(e.target.value)}
         />
 
+        <select value={category} onChange={(e) => setCategory(e.target.value)}>
+          <option value="勉強">勉強</option>
+          <option value="料理">料理</option>
+          <option value="音楽">音楽</option>
+          <option value="美容">美容</option>
+          <option value="その他">その他</option>
+        </select>
+
         <button type="submit">{editingId ? "更新" : "登録"}</button>
 
         {editingId && (
-          <button type="button" onClick={handleCancelEdit}>
+          <button type="button" onClick={resetForm}>
             キャンセル
           </button>
         )}
@@ -173,8 +210,27 @@ function App() {
           type="text"
           placeholder="タイトル・メモで検索"
           value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
+          onChange={(e) => {
+            setSearchText(e.target.value);
+            setCurrentPage(1);
+          }}
         />
+
+        <select
+          className="category-filter"
+          value={filterCategory}
+          onChange={(e) => {
+            setFilterCategory(e.target.value);
+            setCurrentPage(1);
+          }}
+        >
+          <option value="すべて">すべて</option>
+          <option value="勉強">勉強</option>
+          <option value="料理">料理</option>
+          <option value="音楽">音楽</option>
+          <option value="美容">美容</option>
+          <option value="その他">その他</option>
+        </select>
 
         <button
           type="button"
@@ -183,7 +239,10 @@ function App() {
               ? "favorite-filter-button active"
               : "favorite-filter-button"
           }
-          onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+          onClick={() => {
+            setShowFavoritesOnly(!showFavoritesOnly);
+            setCurrentPage(1);
+          }}
         >
           {showFavoritesOnly ? "★ お気に入り中" : "☆ お気に入りのみ"}
         </button>
@@ -191,27 +250,51 @@ function App() {
 
       <h2>動画一覧</h2>
 
-      {filteredVideos.length === 0 ? (
+      {paginatedVideos.length === 0 ? (
         <p className="empty-message">該当する動画がありません</p>
       ) : (
-        <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext
-            items={filteredVideos.map((v) => v.id)}
-            strategy={rectSortingStrategy}
-          >
-            <div className="video-grid">
-              {filteredVideos.map((video) => (
-                <SortableItem
-                  key={video.id}
-                  video={video}
-                  onDelete={handleDelete}
-                  onToggleFavorite={handleToggleFavorite}
-                  onEdit={handleEdit}
-                />
-              ))}
-            </div>
-          </SortableContext>
-        </DndContext>
+        <>
+          <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext
+              items={paginatedVideos.map((v) => v.id)}
+              strategy={rectSortingStrategy}
+            >
+              <div className="video-grid">
+                {paginatedVideos.map((video) => (
+                  <SortableItem
+                    key={video.id}
+                    video={video}
+                    onDelete={handleDelete}
+                    onToggleFavorite={handleToggleFavorite}
+                    onEdit={handleEdit}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+
+          <div className="pagination">
+            <button
+              type="button"
+              onClick={() => setCurrentPage((p) => p - 1)}
+              disabled={currentPage === 1}
+            >
+              前へ
+            </button>
+
+            <span>
+              {currentPage} / {totalPages}
+            </span>
+
+            <button
+              type="button"
+              onClick={() => setCurrentPage((p) => p + 1)}
+              disabled={currentPage === totalPages}
+            >
+              次へ
+            </button>
+          </div>
+        </>
       )}
     </div>
   );
