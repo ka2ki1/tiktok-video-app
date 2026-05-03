@@ -12,7 +12,6 @@ function App() {
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
   const [memo, setMemo] = useState("");
-  const [thumbnailUrl, setThumbnailUrl] = useState("");
   const [thumbnailFile, setThumbnailFile] = useState("");
   const [category, setCategory] = useState("勉強");
 
@@ -76,7 +75,7 @@ function App() {
               url,
               memo,
               category,
-              thumbnail: thumbnailFile || thumbnailUrl || video.thumbnail,
+              thumbnail: thumbnailFile || video.thumbnail,
             }
             : video
         )
@@ -94,7 +93,7 @@ function App() {
       url,
       memo,
       category,
-      thumbnail: thumbnailFile || thumbnailUrl || fetchedThumbnail,
+      thumbnail: thumbnailFile || fetchedThumbnail,
       isFavorite: false,
     };
 
@@ -108,7 +107,6 @@ function App() {
     setTitle("");
     setUrl("");
     setMemo("");
-    setThumbnailUrl("");
     setThumbnailFile("");
     setCategory("勉強");
   }
@@ -118,7 +116,6 @@ function App() {
     setTitle(video.title);
     setUrl(video.url);
     setMemo(video.memo || "");
-    setThumbnailUrl(video.thumbnail || "");
     setThumbnailFile("");
     setCategory(video.category || "勉強");
   }
@@ -188,13 +185,6 @@ function App() {
           placeholder="TikTok URL"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
-        />
-
-        <input
-          type="text"
-          placeholder="サムネイルURL（任意）"
-          value={thumbnailUrl}
-          onChange={(e) => setThumbnailUrl(e.target.value)}
         />
 
         <input
