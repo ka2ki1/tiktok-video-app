@@ -8,6 +8,8 @@ import {
 import SortableItem from "./SortableItem";
 import "./index.css";
 
+const API_URL = "http://192.168.0.105:8000/api/videos";
+
 function App() {
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
@@ -23,24 +25,25 @@ function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
 
-  const [videos, setVideos] = useState(() => {
-    const saved = localStorage.getItem("tiktokVideos");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [videos, setVideos] = useState([]);
 
   useEffect(() => {
-    localStorage.setItem("tiktokVideos", JSON.stringify(videos));
-  }, [videos]);
+    fetchVideos();
+  }, []);
 
-  async function fetchThumbnail(tiktokUrl) {
+  async function fetchVideos() {
     try {
-      const res = await fetch(
-        `http://localhost:3001/api/tiktok?url=${encodeURIComponent(tiktokUrl)}`
-      );
+      const res = await fetch(API_URL);
       const data = await res.json();
-      return data.thumbnail_url || "";
-    } catch {
-      return "";
+
+      const tiktokVideos = Array.isArray(data)
+        ? data.filter((video) => video.platform === "tiktok")
+        : [];
+
+      setVideos(tiktokVideos);
+    } catch (error) {
+      console.error("API取得エラー:", error);
+      setVideos([]);
     }
   }
 
@@ -65,41 +68,50 @@ function App() {
       return;
     }
 
-    if (editingId) {
-      setVideos((prev) =>
-        prev.map((video) =>
-          video.id === editingId
-            ? {
-              ...video,
-              title,
-              url,
-              memo,
-              category,
-              thumbnail: thumbnailFile || video.thumbnail,
-            }
-            : video
-        )
-      );
+    try {
+      if (editingId) {
+        await fetch(`${API_URL}/${editingId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            platform: "tiktok",
+            title,
+            url,
+            memo,
+            category,
+            thumbnail: thumbnailFile,
+          }),
+        });
+
+        resetForm();
+        await fetchVideos();
+        return;
+      }
+
+      await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          platform: "tiktok",
+          title,
+          url,
+          memo,
+          category,
+          thumbnail: thumbnailFile,
+          favorite: false,
+        }),
+      });
 
       resetForm();
-      return;
+      setCurrentPage(1);
+      await fetchVideos();
+    } catch (error) {
+      console.error("保存エラー:", error);
     }
-
-    const fetchedThumbnail = await fetchThumbnail(url);
-
-    const newVideo = {
-      id: String(Date.now()),
-      title,
-      url,
-      memo,
-      category,
-      thumbnail: thumbnailFile || fetchedThumbnail,
-      isFavorite: false,
-    };
-
-    setVideos([newVideo, ...videos]);
-    resetForm();
-    setCurrentPage(1);
   }
 
   function resetForm() {
@@ -116,22 +128,43 @@ function App() {
     setTitle(video.title);
     setUrl(video.url);
     setMemo(video.memo || "");
-    setThumbnailFile("");
+    setThumbnailFile(video.thumbnail || "");
     setCategory(video.category || "勉強");
   }
 
-  function handleDelete(id) {
-    setVideos(videos.filter((video) => video.id !== id));
+  async function handleDelete(id) {
+    try {
+      await fetch(`${API_URL}/${id}`, {
+        method: "DELETE",
+      });
+
+      await fetchVideos();
+    } catch (error) {
+      console.error("削除エラー:", error);
+    }
   }
 
-  function handleToggleFavorite(id) {
-    setVideos((prev) =>
-      prev.map((video) =>
-        video.id === id
-          ? { ...video, isFavorite: !video.isFavorite }
-          : video
-      )
-    );
+  async function handleToggleFavorite(id) {
+    const targetVideo = videos.find((video) => video.id === id);
+    if (!targetVideo) return;
+
+    try {
+      await fetch(`${API_URL}/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...targetVideo,
+          platform: "tiktok",
+          favorite: !targetVideo.favorite,
+        }),
+      });
+
+      await fetchVideos();
+    } catch (error) {
+      console.error("お気に入り更新エラー:", error);
+    }
   }
 
   function handleDragEnd(event) {
@@ -149,14 +182,14 @@ function App() {
     const keyword = searchText.toLowerCase();
 
     const matchesSearch =
-      video.title.toLowerCase().includes(keyword) ||
+      (video.title || "").toLowerCase().includes(keyword) ||
       (video.memo || "").toLowerCase().includes(keyword);
 
     const matchesCategory =
       filterCategory === "すべて" ||
       (video.category || "未分類") === filterCategory;
 
-    const matchesFavorite = showFavoritesOnly ? video.isFavorite : true;
+    const matchesFavorite = showFavoritesOnly ? video.favorite : true;
 
     return matchesSearch && matchesCategory && matchesFavorite;
   });
